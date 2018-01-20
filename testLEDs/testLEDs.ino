@@ -1,49 +1,70 @@
 #include <Adafruit_NeoPixel.h>
-#define NUMPIX_1 180
-#define PIN_1 9
+#include <math.h>
+#define NUMPIX_1 60
+#define PIN_1 3
 Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(NUMPIX_1, PIN_1, NEO_GRB + NEO_KHZ800);
-//#define NUMPIX_2 60
-//#define PIN_2 8
-//Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(NUMPIX_2, PIN_2, NEO_GRB + NEO_KHZ800);
-//#define NUMPIX_3 58
-//#define PIN_3 12
-//Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(NUMPIX_3, PIN_3, NEO_GRB + NEO_KHZ800);
+#define NUMPIX_2 60
+#define PIN_2 6
+Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(NUMPIX_2, PIN_2, NEO_GRB + NEO_KHZ800);
+#define NUMPIX_3 120
+#define PIN_3 9
+Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(NUMPIX_3, PIN_3, NEO_GRB + NEO_KHZ800);
 
-int pix1, pix2, pix3;
-int inc1, inc2, inc3;
-int counter;
+int r1, r2, r3;;
 
 void setup() {
   Serial.begin(9600);
   strip1.begin();
   strip1.show();
-  //  strip2.begin();
-  //  strip2.show();
-  //  strip3.begin();
-  //  strip3.show();
-  inc1 = 1;
-  inc2 = 1;
-  inc3 = 1;
+  strip2.begin();
+  strip2.show();
+  strip3.begin();
+  strip3.show();
+  r1  = random(6000);
+  r2 = random(5000);
+  r3 = random(7000);
 }
 
 void loop() {
-  counter++;
-  if (counter == 10) {
-    counter = 0;
-    pix1 += inc1;
-    if (pix1 == NUMPIX_1 || pix1 == 0) inc1 *= -1;
-    //    pix2 += inc2;
-    //    if (pix2 == NUMPIX_2 || pix2 == 0) inc2 *= -1;
-    //    pix3 += inc3;
-    //    if (pix3 == NUMPIX_3 || pix3 == 0) inc3 *= -1;
-
-    // strip1.setPixelColor(pix - 1, strip1.Color(50, 0, 120)); // bright green color.
-    strip1.setPixelColor(pix1, strip1.Color(80 - millis() / 100 % 79, 0, millis() / 100 % 250)); // bright green color.
-    // strip1.setPixelColor(pix + 1, strip1.Color(120, 0, 255)); // bright green color.
-    strip1.show(); // This sends the updated pixel color to the hardware.
-    //  strip2.setPixelColor(pix2, strip2.Color(75, 0,  millis() / 150 % 255)); // bright green color.
-    //  strip2.show(); // This sends the updated pixel color to the hardware.
-    //  strip3.setPixelColor(pix3, strip3.Color(75, 0,  millis() / 200 % 255)); // bright green color.
-    //  strip3.show(); // This sends the updated pixel color to the hardware.
+  float sin1 = sin((millis() + r1) / 2500.0);
+  float absSin1 = 1.0 + sin1;
+  float sinToLed1 = absSin1 * (NUMPIX_1 / 2);
+  int pix1 = (int)sinToLed1;
+  for (int i = 1; i < 10; i++) {
+    float cMinus = sinToLed1 - pix1 + i;
+    cMinus *= cMinus;
+    float cPlus = sinToLed1 - pix1 - i;
+    cPlus *= cPlus;
+    strip1.setPixelColor(pix1 - i, strip1.Color(0, 0.5 * cMinus, 2.5 * cMinus)); // bright green color.
+    strip1.setPixelColor(pix1 + i, strip1.Color(0, 0.5 * cPlus, 2.5 * cPlus)); // bright green color.
   }
+  strip1.show(); // This sends the updated pixel color to the hardware.
+
+  float sin2 = sin((millis() + r2) / 2200.0);
+  float absSin2 = 1.0 + sin2;
+  float sinToLed2 = absSin1 * (NUMPIX_2 / 2);
+  int pix2 = (int)sinToLed2;
+  for (int i = 1; i < 10; i++) {
+    float cMinus = sinToLed2 - pix2 + i;
+    cMinus *= cMinus;
+    float cPlus = sinToLed2 - pix2 - i;
+    cPlus *= cPlus;
+    strip2.setPixelColor(pix2 - i, strip1.Color(0, 0.5 * cMinus, 2.5 * cMinus)); // bright green color.
+    strip2.setPixelColor(pix2 + i, strip1.Color(0, 0.5 * cPlus, 2.5 * cPlus)); // bright green color.
+  }
+  strip2.show(); // This sends the updated pixel color to the hardware.
+
+  float sin3 = sin((millis() + r3) / 5500.0);
+  float absSin3 = 1.0 + sin3;
+  float sinToLed3 = absSin3 * (NUMPIX_3 / 2);
+  int pix3 = (int)sinToLed3;
+  for (int i = 1; i < 15; i++) {
+    float cMinus = sinToLed3 - pix3 + i;
+    cMinus *= cMinus;
+    float cPlus = sinToLed3 - pix3 - i;
+    cPlus *= cPlus;
+    strip3.setPixelColor(pix3 - i, strip1.Color(0, 0.25 * cMinus, 1.25 * cMinus)); // bright green color.
+    strip3.setPixelColor(pix3 + i, strip1.Color(0, 0.25 * cPlus, 1.25 * cPlus)); // bright green color.
+  }
+  strip3.show(); // This sends the updated pixel color to the hardware.
 }
