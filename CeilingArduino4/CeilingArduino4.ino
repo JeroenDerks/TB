@@ -21,28 +21,17 @@ const byte dim_curve[] = {
 };
 
 int rgb_colors1[3];
-int rgb_colors2[3];
 
-#define NUMPIX_1 90
-#define PIN_1 2
+#define NUMPIX_1 120
+#define PIN_1 3
 Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(NUMPIX_1, PIN_1, NEO_GRB + NEO_KHZ800);
-#define NUMPIX_2 180
-#define PIN_2 4
+#define NUMPIX_2 90
+#define PIN_2 6
 Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(NUMPIX_2, PIN_2, NEO_GRB + NEO_KHZ800);
-#define NUMPIX_3 120
-#define PIN_3 6
-Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(NUMPIX_3, PIN_3, NEO_GRB + NEO_KHZ800);
-#define NUMPIX_4 120
-#define PIN_4 8
-Adafruit_NeoPixel strip4 = Adafruit_NeoPixel(NUMPIX_4, PIN_4, NEO_GRB + NEO_KHZ800);
 
-int inputPin1 = 12;               // choose the input pin (for PIR sensor)
-int pirState1 = LOW;             // we start, assuming no motion detected
-int val1 = 0;                    // variable for reading the pin status
-
-int inputPin2 = 11;               // choose the input pin (for PIR sensor)
-int pirState2 = LOW;             // we start, assuming no motion detected
-int val2 = 0;                    // variable for reading the pin status
+int inputPin1 = 11;
+int pirState1 = LOW;
+int val1 = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -50,38 +39,35 @@ void setup() {
   strip1.show();
   strip2.begin();
   strip2.show();
-  strip3.begin();
-  strip3.show();
-  strip4.begin();
-  strip4.show();
-
 }
 
 void loop() {
-
   ///////////////// SENSOR 1 /////////////////
 
   val1 = digitalRead(inputPin1);
+  Serial.println(val1);
   if (val1 != pirState1) {
     if (val1 == HIGH) {
       int h =  (int)(millis() / 500.0) % 360;
       if (h > 180) h = 360 - h;
       int hue = (240 + h) % 360;
       getRGB(hue, 255, 255, rgb_colors1);
-      // LEDstrip 3.1
-      for (int i = NUMPIX_1; i >= 0 ; i--) {
+      // LEDstrip 5.1
+      for (int i = 0; i <= NUMPIX_1; i++) {
         strip1.setPixelColor(i, strip1.Color(rgb_colors1[0], rgb_colors1[1], rgb_colors1[2]));
-        // strip1.setPixelColor(NUMPIX_1 - i, strip1.Color(rgb_colors1[0], rgb_colors1[1], rgb_colors1[2]));
         strip1.show();
+        // LEDstrip 5.2
+        strip2.setPixelColor(NUMPIX_2 - i, strip2.Color(rgb_colors1[0], rgb_colors1[1], rgb_colors1[2]));
+        strip2.show();
         delay(4);
       }
     }
     pirState1 = val1;
   }
 
-  ///////////////// LEDstrip 3.1 = NUMPIX_1 /////////////////
+  ///////////////// LEDstrip 5.1 = NUMPIX_1 /////////////////
 
-  float sin1 = sin(millis() / 2200.0);
+  float sin1 = sin(millis() / 3120.0);
   float absSin1 = 1.0 + sin1;
   float sinToLed1 = - (NUMPIX_1 * 0.5) + (absSin1 * NUMPIX_1);
   int pix1 = (int)sinToLed1;
@@ -99,37 +85,9 @@ void loop() {
   }
   strip1.show();
 
+  ///////////////// LEDstrip 5.2 = NUMPIX_2 /////////////////
 
-  ///////////////// SENSOR 2 /////////////////
-
-  val2 = digitalRead(inputPin2);
-  if (val2 != pirState2) {
-    if (val2 == HIGH) {
-      int h = (int)(millis() / 500.0) % 360;
-      if (h > 180) h = 360 - h;
-      int hue = (240 + h) % 360;
-      getRGB(hue, 255, 255, rgb_colors2);
-      for (int i = 0; i <= NUMPIX_2 - 20; i++) {
-        // LEDstrip 3.2
-        strip2.setPixelColor(20 - i, strip2.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
-        strip2.setPixelColor(20 + i, strip2.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
-        strip2.show();
-        // LEDstrip 3.3
-        strip3.setPixelColor(i, strip3.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
-        strip3.show();
-        // LEDstrip 3.4
-        strip4.setPixelColor(NUMPIX_4 - 24 - i, strip4.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
-        strip4.setPixelColor(NUMPIX_4 - 24 + i, strip4.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
-        strip4.show();
-        delay(4);
-      }
-    }
-    pirState1 = val1;
-  }
-
-  ///////////////// LEDstrip 3.2 = NUMPIX_2 /////////////////
-
-  sin1 = sin(millis() / 4100.0);
+  sin1 = sin(millis() / 2750.0);
   absSin1 = 1.0 + sin1;
   sinToLed1 = - (NUMPIX_2 * 0.5) + (absSin1 * NUMPIX_2);
   pix1 = (int)sinToLed1;
@@ -141,52 +99,11 @@ void loop() {
     float cPlus = sinToLed1 - pix1 - i;
     cPlus *= cPlus * 0.01;
     if (cPlus > 1.0) cPlus = 1.0;
-    strip2.setPixelColor(pix1 - 1  - i, strip2.Color (rgb_colors2[0] * cMinus, rgb_colors2[1] * cMinus, rgb_colors2[2] * cMinus));
+    strip2.setPixelColor(pix1 - 1  - i, strip2.Color (rgb_colors1[0] * cMinus, rgb_colors1[1] * cMinus, rgb_colors1[2] * cMinus));
     strip2.setPixelColor(pix1, strip2.Color (0, 0, 0));
-    strip2.setPixelColor(pix1 + 1 + i, strip2.Color(rgb_colors2[0] * cPlus, rgb_colors2[1] * cPlus, rgb_colors2[2] * cPlus));
+    strip2.setPixelColor(pix1 + 1 + i, strip2.Color(rgb_colors1[0] * cPlus, rgb_colors1[1] * cPlus, rgb_colors1[2] * cPlus));
   }
   strip2.show();
-
-  ///////////////// LEDstrip 3.3 = NUMPIX_3 /////////////////
-
-  sin1 = sin(millis() / 2650.0);
-  absSin1 = 1.0 + sin1;
-  sinToLed1 = - (NUMPIX_3 * 0.5) + (absSin1 * NUMPIX_3);
-  pix1 = (int)sinToLed1;
-
-  for (int i = 0; i < 11; i++) {
-    float cMinus = sinToLed1 - pix1 + i;
-    cMinus *= cMinus * 0.01;
-    if (cMinus > 1.0) cMinus = 1.0;
-    float cPlus = sinToLed1 - pix1 - i;
-    cPlus *= cPlus * 0.01;
-    if (cPlus > 1.0) cPlus = 1.0;
-    strip3.setPixelColor(pix1 - 1  - i, strip3.Color (rgb_colors2[0] * cMinus, rgb_colors2[1] * cMinus, rgb_colors2[2] * cMinus));
-    strip3.setPixelColor(pix1, strip3.Color (0, 0, 0));
-    strip3.setPixelColor(pix1 + 1 + i, strip3.Color(rgb_colors2[0] * cPlus, rgb_colors2[1] * cPlus, rgb_colors2[2] * cPlus));
-  }
-  strip3.show();
-
-  
-  ///////////////// LEDstrip 3.4 = NUMPIX_4 /////////////////
-  
-  sin1 = sin(millis() / 3100.0);
-  absSin1 = 1.0 + sin1;
-  sinToLed1 = - (NUMPIX_4 * 0.5) + (absSin1 * NUMPIX_4);
-  pix1 = (int)sinToLed1;
-
-  for (int i = 0; i < 11; i++) {
-    float cMinus = sinToLed1 - pix1 + i;
-    cMinus *= cMinus * 0.01;
-    if (cMinus > 1.0) cMinus = 1.0;
-    float cPlus = sinToLed1 - pix1 - i;
-    cPlus *= cPlus * 0.01;
-    if (cPlus > 1.0) cPlus = 1.0;
-    strip4.setPixelColor(pix1 - 1  - i, strip4.Color (rgb_colors2[0] * cMinus, rgb_colors2[1] * cMinus, rgb_colors2[2] * cMinus));
-    strip4.setPixelColor(pix1, strip4.Color (0, 0, 0));
-    strip4.setPixelColor(pix1 + 1 + i, strip4.Color(rgb_colors2[0] * cPlus, rgb_colors2[1] * cPlus, rgb_colors2[2] * cPlus));
-  }
-  strip4.show();
 }
 
 void getRGB(int hue, int sat, int val, int colors[3]) {
