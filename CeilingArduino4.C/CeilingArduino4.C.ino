@@ -21,6 +21,7 @@ const byte dim_curve[] = {
 };
 
 int rgb_colors1[3];
+int rgb_colors2[3];
 
 #define NUMPIX_1 120
 #define PIN_1 3
@@ -28,6 +29,10 @@ Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(NUMPIX_1, PIN_1, NEO_GRB + NEO_KHZ8
 #define NUMPIX_2 90
 #define PIN_2 6
 Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(NUMPIX_2, PIN_2, NEO_GRB + NEO_KHZ800);
+
+bool changeColor1;
+bool changeColor2;
+int hue1, hue2;
 
 int inputPin1 = 11;
 int pirState1 = LOW;
@@ -39,6 +44,8 @@ void setup() {
   strip1.show();
   strip2.begin();
   strip2.show();
+  changeColor1 = false;
+  changeColor2 = false;
 }
 
 void loop() {
@@ -50,14 +57,16 @@ void loop() {
     if (val1 == HIGH) {
       int h =  (int)(millis() / 500.0) % 360;
       if (h > 180) h = 360 - h;
-      int hue = (240 + h) % 360;
-      getRGB(hue, 255, 255, rgb_colors1);
+      hue1 = (240 + h) % 360;
+      hue2 = hue1;
+      getRGB(hue1, 255, 255, rgb_colors1);
+      getRGB(hue2, 255, 255, rgb_colors2);
       // LEDstrip 5.1
       for (int i = 0; i <= NUMPIX_1; i++) {
         strip1.setPixelColor(i, strip1.Color(rgb_colors1[0], rgb_colors1[1], rgb_colors1[2]));
         strip1.show();
         // LEDstrip 5.2
-        strip2.setPixelColor(NUMPIX_1 - i, strip2.Color(rgb_colors1[0], rgb_colors1[1], rgb_colors1[2]));
+        strip2.setPixelColor(NUMPIX_1 - i, strip2.Color(rgb_colors2[0], rgb_colors2[1], rgb_colors2[2]));
         strip2.show();
         delay(4);
       }
@@ -72,6 +81,18 @@ void loop() {
   float sinToLed1 = - (NUMPIX_1 * 0.5) + (absSin1 * NUMPIX_1);
   int pix1 = (int)sinToLed1;
 
+  if (!changeColor1 && sin1 > 0.0 && sin1 < 0.2) changeColor1 = true;
+  else if (changeColor1 && sin1 > 0.95) {
+    hue1 += 30;
+    hue1 = hue1 % 360;
+    getRGB(hue1, 255, 255, rgb_colors1);
+    changeColor1 = false;
+  }  else if (changeColor1 && sin1 < -0.95) {
+    hue1 -= 30;
+    hue1 = hue1 % 360;
+    getRGB(hue1, 255, 255, rgb_colors1);
+    changeColor1 = false;
+  }
   for (int i = 0; i < 11; i++) {
     float cMinus = sinToLed1 - pix1 + i;
     cMinus *= cMinus * 0.01;
@@ -79,8 +100,7 @@ void loop() {
     float cPlus = sinToLed1 - pix1 - i;
     cPlus *= cPlus * 0.01;
     if (cPlus > 1.0) cPlus = 1.0;
-    strip1.setPixelColor(pix1 - 1  - i, strip1.Color (rgb_colors1[0] * cMinus, rgb_colors1[1] * cMinus, rgb_colors1[2] * cMinus));
-    strip1.setPixelColor(pix1, strip1.Color (0, 0, 0));
+    strip1.setPixelColor(pix1 - i, strip1.Color (rgb_colors1[0] * cMinus, rgb_colors1[1] * cMinus, rgb_colors1[2] * cMinus));
     strip1.setPixelColor(pix1 + 1 + i, strip1.Color(rgb_colors1[0] * cPlus, rgb_colors1[1] * cPlus, rgb_colors1[2] * cPlus));
   }
   strip1.show();
@@ -91,7 +111,19 @@ void loop() {
   absSin1 = 1.0 + sin1;
   sinToLed1 = - (NUMPIX_2 * 0.5) + (absSin1 * NUMPIX_2);
   pix1 = (int)sinToLed1;
-
+  if (!changeColor2 && sin1 > 0.0 && sin1 < 0.2) changeColor2 = true;
+  else if (changeColor2 && sin1 < -0.95) {
+    hue2 -= 30;
+    hue2 = hue2 % 360;
+    getRGB(hue2, 255, 255, rgb_colors2);
+    changeColor2 = false;
+  }
+  else if (changeColor2 && sin1 > 0.95) {
+    hue2 += 30;
+    hue2 = hue2 % 360;
+    getRGB(hue2, 255, 255, rgb_colors2);
+    changeColor2 = false;
+  }
   for (int i = 0; i < 11; i++) {
     float cMinus = sinToLed1 - pix1 + i;
     cMinus *= cMinus * 0.01;
@@ -99,9 +131,8 @@ void loop() {
     float cPlus = sinToLed1 - pix1 - i;
     cPlus *= cPlus * 0.01;
     if (cPlus > 1.0) cPlus = 1.0;
-    strip2.setPixelColor(pix1 - 1  - i, strip2.Color (rgb_colors1[0] * cMinus, rgb_colors1[1] * cMinus, rgb_colors1[2] * cMinus));
-    strip2.setPixelColor(pix1, strip2.Color (0, 0, 0));
-    strip2.setPixelColor(pix1 + 1 + i, strip2.Color(rgb_colors1[0] * cPlus, rgb_colors1[1] * cPlus, rgb_colors1[2] * cPlus));
+    strip2.setPixelColor(pix1 - i, strip2.Color (rgb_colors2[0] * cMinus, rgb_colors2[1] * cMinus, rgb_colors2[2] * cMinus));
+    strip2.setPixelColor(pix1 + 1 + i, strip2.Color(rgb_colors2[0] * cPlus, rgb_colors2[1] * cPlus, rgb_colors2[2] * cPlus));
   }
   strip2.show();
 }
